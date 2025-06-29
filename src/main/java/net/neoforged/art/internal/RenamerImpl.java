@@ -12,13 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -132,6 +126,7 @@ class RenamerImpl implements Renamer {
 
         AsyncHelper async = new AsyncHelper(threads);
         try {
+            transformers.sort(Comparator.comparingInt(Transformer::getPriority));
 
             /* Disabled until we do something with it
             // Gather original file Hashes, so that we can detect changes and update the manifest if necessary

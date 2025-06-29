@@ -18,11 +18,10 @@ gradleutils {
             suffixBranch()
         }
     }
-    setupCentralPublishing()
     setupSigning(signAllPublications: true)
 }
 
-version = gradleutils.version
+version = "2.0.8-Patched-3"
 println('Version: ' + version)
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
@@ -118,10 +117,17 @@ publishing {
         }
     }
     repositories {
-        maven gradleutils.publishingMaven
+        if (rootProject.hasProperty('MAVEN_USER') && rootProject.hasProperty('MAVEN_PASSWORD') && rootProject.hasProperty('MAVEN_URL')) {
+            url rootProject.getProperty('MAVEN_URL')
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = rootProject.getProperty('MAVEN_USER') ?: 'not'
+                password = rootProject.getProperty('MAVEN_PASSWORD') ?: 'set'
+            }
+        } else {
+            url 'file://' + rootProject.file('repo').getAbsolutePath()
+        }
     }
-}
-
-changelog {
-    from INITIAL_CHANGELOG_TAG
 }

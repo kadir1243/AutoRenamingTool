@@ -10,15 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
-import net.neoforged.art.internal.EntryImpl;
-import net.neoforged.art.internal.FFLineFixer;
-import net.neoforged.art.internal.IdentifierFixer;
-import net.neoforged.art.internal.ParameterAnnotationFixer;
-import net.neoforged.art.internal.ParameterFinalFlagRemover;
-import net.neoforged.art.internal.RecordFixer;
-import net.neoforged.art.internal.RenamingTransformer;
-import net.neoforged.art.internal.SignatureStripperTransformer;
-import net.neoforged.art.internal.SourceFixer;
+
+import net.neoforged.art.internal.*;
 import net.neoforged.srgutils.IMappingFile;
 import org.objectweb.asm.Type;
 
@@ -113,6 +106,14 @@ public interface Transformer {
         return ctx -> ParameterFinalFlagRemover.INSTANCE;
     }
 
+    public static Factory innerClassFixerFactory(File exceptor) {
+        return ctx -> new InnerClassFixer(ctx.getDebug(), exceptor);
+    }
+
+    public static Factory signatureInjectorFactory(File signaturizer) {
+        return ctx -> new SignatureInjector(ctx.getDebug(), signaturizer);
+    }
+
     /**
      * Create a transformer that applies line number corrections from Fernflower.
      *
@@ -152,6 +153,10 @@ public interface Transformer {
      */
     public static Factory signatureStripperFactory(SignatureStripperConfig config) {
         return ctx -> new SignatureStripperTransformer(ctx.getLog(), config);
+    }
+
+    default int getPriority() {
+        return 0;
     }
 
     /**

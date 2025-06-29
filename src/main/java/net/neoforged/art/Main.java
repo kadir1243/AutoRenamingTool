@@ -38,6 +38,8 @@ public class Main {
         OptionSpec<File> libO    = parser.acceptsAll(Arrays.asList("lib", "e"), "Additional library to use for inheritance").withRequiredArg().ofType(File.class);
         OptionSpec<Void> fixAnnO = parser.accepts("ann-fix", "Fixes misaligned parameter annotations caused by Proguard");
         OptionSpec<Void> unfinalParams0 = parser.accepts("unfinal-params", "Remove final flag from parameters");
+        OptionSpec<File> innerClassFix0 = parser.accepts("inner-class-fix", "Uses exceptor.json to add inner class attributes").withOptionalArg().ofType(File.class);
+        OptionSpec<File> injectSignatureO = parser.accepts("inject-signatures", "Uses signaturizer.json to add signature attributes").withOptionalArg().ofType(File.class);
         OptionSpec<Void> fixRecordsO = parser.accepts("record-fix", "Fixes record components and attributes stripped by Proguard.");
         OptionSpec<IdentifierFixerConfig> fixIdsO = parser.accepts("ids-fix", "Fixes local variables that are not valid java identifiers.").withOptionalArg().withValuesConvertedBy(new EnumConverter<>(IdentifierFixerConfig.class)).defaultsTo(IdentifierFixerConfig.ALL);
         OptionSpec<SourceFixerConfig> fixSrcO = parser.accepts("src-fix", "Fixes the 'SourceFile' attribute of classes.").withOptionalArg().withValuesConvertedBy(new EnumConverter<>(SourceFixerConfig.class)).defaultsTo(SourceFixerConfig.JAVA);
@@ -128,6 +130,20 @@ public class Main {
             builder.add(Transformer.parameterFinalFlagRemoverFactory());
         } else {
             log.accept("Unfinal Parameters: false");
+        }
+
+        if (options.has(innerClassFix0)) {
+            log.accept("Inner Class Fixer: true");
+            builder.add(Transformer.innerClassFixerFactory(options.valueOf(innerClassFix0)));
+        } else {
+            log.accept("Inner Class Fixer: false");
+        }
+
+        if (options.has(injectSignatureO)) {
+            log.accept("Signature Injector: true");
+            builder.add(Transformer.signatureInjectorFactory(options.valueOf(injectSignatureO)));
+        } else {
+            log.accept("Signature Injector: false");
         }
 
         if (options.has(fixRecordsO)) {

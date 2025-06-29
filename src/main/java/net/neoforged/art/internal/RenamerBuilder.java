@@ -8,8 +8,11 @@ package net.neoforged.art.internal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import net.neoforged.art.api.ClassProvider;
 import net.neoforged.art.api.Renamer;
 import net.neoforged.art.api.Renamer.Builder;
@@ -21,7 +24,7 @@ import static java.util.Objects.requireNonNull;
 public class RenamerBuilder implements Builder {
     private final List<File> libraries = new ArrayList<>();
     private final List<ClassProvider> classProviders = new ArrayList<>();
-    private final List<Transformer.Factory> transformerFactories = new ArrayList<>();
+    private final List<Transformer.Factory> transformerFactories = new LinkedList<>();
     private int threads = Runtime.getRuntime().availableProcessors();
     private boolean withJvmClasspath = false;
     private Consumer<String> logger = System.out::println;
@@ -117,10 +120,7 @@ public class RenamerBuilder implements Builder {
             }
         };
 
-        final List<Transformer> transformers = new ArrayList<>(transformerFactories.size());
-        for (Transformer.Factory factory : transformerFactories) {
-            transformers.add(requireNonNull(factory.create(ctx), "output of " + factory));
-        }
+        final List<Transformer> transformers = transformerFactories.stream().map(factory -> requireNonNull(factory.create(ctx), "output of " + factory)).collect(Collectors.toCollection(LinkedList::new));
         return new RenamerImpl(libraries, transformers, sortedClassProvider, classProviders, threads, logger, debug);
     }
 }
